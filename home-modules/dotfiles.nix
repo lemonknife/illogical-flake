@@ -15,9 +15,38 @@ let
 in
 {
   options.programs.illogical-impulse.dotfiles = {
-    fish.enable = mkEnableOption "Use the Illogical Impulse fish config" // { default = true; };
-    kitty.enable = mkEnableOption "Install kitty and use the Illogical Impulse kitty config" // { default = true; };
-    starship.enable = mkEnableOption "Install starship and use the Illogical Impulse prompt" // { default = true; };
+    # 终端与 Shell
+    fish.enable = mkEnableOption "fish config" // { default = true; };
+    kitty.enable = mkEnableOption "kitty config" // { default = true; };
+    starship.enable = mkEnableOption "starship config" // { default = true; };
+    zshrc.enable = mkEnableOption "zshrc config" // { default = true; };
+    foot.enable = mkEnableOption "foot config" // { default = true; };
+    konsolerc.enable = mkEnableOption "konsolerc config" // { default = true; };
+
+    # 桌面与核心组件 (Hyprland 生态拆分)
+    hyprland.enable = mkEnableOption "hyprland base config" // { default = true; };
+    hyprlock.enable = mkEnableOption "hyprlock config" // { default = true; };
+    hypridle.enable = mkEnableOption "hypridle config" // { default = true; };
+    
+    quickshell.enable = mkEnableOption "quickshell config" // { default = true; };
+    wlogout.enable = mkEnableOption "wlogout config" // { default = true; };
+    fuzzel.enable = mkEnableOption "fuzzel config" // { default = true; };
+    xdg-desktop-portal.enable = mkEnableOption "xdg-desktop-portal config" // { default = true; };
+
+    # 主题、外观与字体
+    fontconfig.enable = mkEnableOption "fontconfig" // { default = true; };
+    kde-material-you-colors.enable = mkEnableOption "kde-material-you-colors" // { default = true; };
+    kdeglobals.enable = mkEnableOption "kdeglobals" // { default = true; };
+    Kvantum.enable = mkEnableOption "Kvantum" // { default = true; };
+    matugen.enable = mkEnableOption "matugen config" // { default = true; };
+    darklyrc.enable = mkEnableOption "darklyrc" // { default = true; };
+    dolphinrc.enable = mkEnableOption "dolphinrc" // { default = true; };
+
+    # 浏览器与其他应用
+    chrome-flags.enable = mkEnableOption "chrome-flags" // { default = true; };
+    thorium-flags.enable = mkEnableOption "thorium-flags" // { default = true; };
+    code-flags.enable = mkEnableOption "code-flags" // { default = true; };
+    mpv.enable = mkEnableOption "mpv config" // { default = true; };
   };
 
   options.programs.illogical-impulse.hyprland = {
@@ -36,9 +65,122 @@ in
     # Install plugin .so files into the user environment
     home.packages = cfg.hyprland.plugins;
 
+    # ==========================================
+    # 核心重构：细粒度纯声明式配置映射
+    # ==========================================
+    xdg.configFile = {
+      # 终端与 Shell
+      "fish" = mkIf cfg.dotfiles.fish.enable { source = "${dotfilesSource}/dots/.config/fish"; };
+      "kitty" = mkIf cfg.dotfiles.kitty.enable { source = "${dotfilesSource}/dots/.config/kitty"; };
+      "starship.toml" = mkIf cfg.dotfiles.starship.enable { source = "${dotfilesSource}/dots/.config/starship.toml"; };
+      "zshrc.d" = mkIf cfg.dotfiles.zshrc.enable { source = "${dotfilesSource}/dots/.config/zshrc.d"; };
+      "foot" = mkIf cfg.dotfiles.foot.enable { source = "${dotfilesSource}/dots/.config/foot"; };
+      "konsolerc" = mkIf cfg.dotfiles.konsolerc.enable { source = "${dotfilesSource}/dots/.config/konsolerc"; };
+
+      # ------------------------------------------
+      # Hyprland 生态精细化映射
+      # ------------------------------------------
+      
+      # 1. Hypridle
+      "hypr/hypridle.conf" = mkIf cfg.dotfiles.hypridle.enable { source = "${dotfilesSource}/dots/.config/hypr/hypridle.conf"; };
+      
+      # 2. Hyprlock
+      "hypr/hyprlock.conf" = mkIf cfg.dotfiles.hyprlock.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprlock.conf"; };
+      "hypr/hyprlock" = mkIf cfg.dotfiles.hyprlock.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprlock"; };
+
+      # 3. Hyprland 根目录文件
+      "hypr/hyprland.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland.lua"; };
+
+      # 4. Hyprland/custom 目录 (隔离出 env.lua 和 general.lua 以便动态生成)
+      "hypr/custom/execs.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/custom/execs.lua"; };
+      "hypr/custom/keybinds.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/custom/keybinds.lua"; };
+      "hypr/custom/rules.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/custom/rules.lua"; };
+      "hypr/custom/scripts" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/custom/scripts"; };
+      "hypr/custom/variables.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/custom/variables.lua"; };
+
+      # 动态覆盖: custom/env.lua
+      "hypr/custom/env.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        text = ''
+          -- Generated by illogical-flake Nix config. Do not edit manually.
+          local home_dir = os.getenv("HOME") or ""
+          local user     = os.getenv("USER") or ""
+
+          hl.env("PATH",
+            home_dir .. "/.nix-profile/bin" ..
+            ":/etc/profiles/per-user/" .. user .. "/bin" ..
+            ":" .. (os.getenv("PATH") or "/usr/local/bin:/usr/bin:/bin"))
+
+          hl.env("XDG_DATA_DIRS",
+            home_dir .. "/.local/share" ..
+            ":" .. home_dir .. "/.nix-profile/share" ..
+            ":/etc/profiles/per-user/" .. user .. "/share" ..
+            ":/run/current-system/sw/share" ..
+            ":" .. home_dir .. "/.local/share/flatpak/exports/share" ..
+            ":/var/lib/flatpak/exports/share" ..
+            ":/usr/local/share:/usr/share")
+
+          hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+        '';
+      };
+
+      # 动态追加: custom/general.lua (读取上游配置并拼接插件列表)
+      "hypr/custom/general.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/custom/general.lua") + ''
+          
+          -- Hyprland plugins loaded declaratively by Nix
+          ${lib.concatMapStrings (plugin: ''
+          hl.plugin("${plugin}/lib/lib${plugin.pname}.so")
+          '') cfg.hyprland.plugins}
+        '';
+      };
+
+      # 5. Hyprland/hyprland 目录 (隔离出 shellOverrides)
+      "hypr/hyprland/colors.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/colors.lua"; };
+      "hypr/hyprland/env.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/env.lua"; };
+      "hypr/hyprland/execs.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/execs.lua"; };
+      "hypr/hyprland/general.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/general.lua"; };
+      "hypr/hyprland/keybinds.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/keybinds.lua"; };
+      "hypr/hyprland/lib" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/lib"; };
+      "hypr/hyprland/rules.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/rules.lua"; };
+      "hypr/hyprland/scripts" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/scripts"; };
+      "hypr/hyprland/services" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/services"; };
+      "hypr/hyprland/variables.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/variables.lua"; };
+
+      # 动态占位: shellOverrides/main.lua
+      "hypr/hyprland/shellOverrides/main.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        text = "-- Empty placeholder created by Nix\n";
+      };
+
+      # ------------------------------------------
+      # 其他桌面组件与配置
+      # ------------------------------------------
+      "quickshell/ii" = mkIf cfg.dotfiles.quickshell.enable { source = "${dotfilesSource}/dots/.config/quickshell/ii"; };
+      "wlogout" = mkIf cfg.dotfiles.wlogout.enable { source = "${dotfilesSource}/dots/.config/wlogout"; };
+      "fuzzel" = mkIf cfg.dotfiles.fuzzel.enable { source = "${dotfilesSource}/dots/.config/fuzzel"; };
+      "xdg-desktop-portal" = mkIf cfg.dotfiles.xdg-desktop-portal.enable { source = "${dotfilesSource}/dots/.config/xdg-desktop-portal"; };
+      "fontconfig" = mkIf cfg.dotfiles.fontconfig.enable { source = "${dotfilesSource}/dots/.config/fontconfig"; };
+      "kde-material-you-colors" = mkIf cfg.dotfiles.kde-material-you-colors.enable { source = "${dotfilesSource}/dots/.config/kde-material-you-colors"; };
+      "kdeglobals" = mkIf cfg.dotfiles.kdeglobals.enable { source = "${dotfilesSource}/dots/.config/kdeglobals"; };
+      "Kvantum" = mkIf cfg.dotfiles.Kvantum.enable { source = "${dotfilesSource}/dots/.config/Kvantum"; };
+      "matugen" = mkIf cfg.dotfiles.matugen.enable { source = "${dotfilesSource}/dots/.config/matugen"; };
+      "darklyrc" = mkIf cfg.dotfiles.darklyrc.enable { source = "${dotfilesSource}/dots/.config/darklyrc"; };
+      "dolphinrc" = mkIf cfg.dotfiles.dolphinrc.enable { source = "${dotfilesSource}/dots/.config/dolphinrc"; };
+      "chrome-flags.conf" = mkIf cfg.dotfiles.chrome-flags.enable { source = "${dotfilesSource}/dots/.config/chrome-flags.conf"; };
+      "thorium-flags.conf" = mkIf cfg.dotfiles.thorium-flags.enable { source = "${dotfilesSource}/dots/.config/thorium-flags.conf"; };
+      "code-flags.conf" = mkIf cfg.dotfiles.code-flags.enable { source = "${dotfilesSource}/dots/.config/code-flags.conf"; };
+      "mpv" = mkIf cfg.dotfiles.mpv.enable { source = "${dotfilesSource}/dots/.config/mpv"; };
+    };
+
+    xdg.dataFile = {
+      "icons/hicolor/scalable/apps/illogical-impulse.svg".source = 
+        "${dotfilesSource}/dots/.local/share/icons/illogical-impulse.svg";
+
+      "konsole/Profile 1.profile" = mkIf cfg.dotfiles.konsolerc.enable {
+        source = "${dotfilesSource}/dots/.local/share/konsole/Profile 1.profile";
+      };
+    };
+
     # Fake venv at the path upstream expects: ~/.local/state/quickshell/.venv
-    # The complex shebang in Python scripts does: source $ILLOGICAL_IMPULSE_VIRTUAL_ENV/bin/activate
-    # The upstream env.lua sets ILLOGICAL_IMPULSE_VIRTUAL_ENV to this path.
     home.file = {
       ".local/state/quickshell/.venv/bin/activate".text = ''
         # Generated by illogical-flake - provides the Nix Python env as a fake venv
@@ -57,264 +199,19 @@ in
       '';
     };
 
-    # OneUI icons are copied and modified by the activation script below
-    # (cannot use home.file symlinks because we need to modify index.theme)
-
-    # Symlink standard icon themes
-    # Note: Papirus themes are handled by activation script (to add inode-directory symlinks)
-    home.file.".local/share/icons/Adwaita".source = "${pkgs.adwaita-icon-theme}/share/icons/Adwaita";
-    # hicolor and Papirus are managed by the activation script below, not as symlinks
-
     # Configure icon theme for GTK and Qt applications
-    # Use OneUI-dark which will fall back to Papirus-Dark via inheritance
     gtk = {
       enable = mkDefault true;
       iconTheme = {
         name = mkDefault "OneUI-dark";
-        package = mkDefault (let
-          customPkgs = import ../pkgs { inherit pkgs; };
-        in customPkgs.illogical-impulse-oneui4-icons);
+        package = mkDefault customPkgs.illogical-impulse-oneui4-icons;
       };
     };
 
-    # Set icon theme via dconf for GNOME/GTK apps
     dconf.settings = {
       "org/gnome/desktop/interface" = {
         icon-theme = mkDefault "OneUI-dark";
       };
     };
-
-    # Use activation script to copy files instead of symlinking
-    home.activation.copyIllogicalImpulseConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
-      # Path to the config directory in the dotfiles source
-      configPath="${dotfilesSource}/dots/.config"
-      targetPath="$HOME/.config"
-
-      # Directories to exclude from copying (QuickShell manages these dynamically)
-      excludedDirs=("illogical-impulse")
-
-      # Copy all items from dotfiles .config to user .config
-      $DRY_RUN_CMD mkdir -p "$targetPath"
-
-      # Create illogical-impulse directory structure if it doesn't exist
-      $DRY_RUN_CMD mkdir -p "$targetPath/illogical-impulse"
-
-      # Copy the default config.json only if it doesn't already exist
-      if [ ! -f "$targetPath/illogical-impulse/config.json" ]; then
-        if [ -f "$configPath/illogical-impulse/config.json" ]; then
-          $DRY_RUN_CMD cp "$configPath/illogical-impulse/config.json" "$targetPath/illogical-impulse/config.json"
-          $DRY_RUN_CMD chmod u+w "$targetPath/illogical-impulse/config.json"
-        fi
-      fi
-
-      for item in "$configPath"/*; do
-        itemName=$(basename "$item")
-
-        # Skip excluded directories
-        skip=false
-        for excluded in "''${excludedDirs[@]}"; do
-          if [ "$itemName" = "$excluded" ]; then
-            skip=true
-            break
-          fi
-        done
-
-        if [ "$skip" = true ]; then
-          continue
-        fi
-
-        targetItem="$targetPath/$itemName"
-
-        # Remove existing file/directory if it exists
-        if [ -e "$targetItem" ] || [ -L "$targetItem" ]; then
-          $DRY_RUN_CMD rm -rf "$targetItem"
-        fi
-
-        # Copy the item (works for both files and directories)
-        $DRY_RUN_CMD cp -r "$item" "$targetItem"
-
-        # Make files writable
-        $DRY_RUN_CMD chmod -R u+w "$targetItem"
-      done
-
-      echo "Copied Illogical Impulse configuration files to ~/.config"
-
-      # Fix Qt icon theme configuration to use OneUI-dark/OneUI-light with Papirus fallback
-      for qt_conf in "$targetPath/qt5ct/qt5ct.conf" "$targetPath/qt6ct/qt6ct.conf"; do
-        if [ -f "$qt_conf" ]; then
-          # Replace OneUI with OneUI-dark, OneUI-light stays as-is
-          $DRY_RUN_CMD sed -i 's/^icon_theme=OneUI$/icon_theme=OneUI-dark/' "$qt_conf"
-          $DRY_RUN_CMD sed -i 's/^icon_theme=OneUI-light$/icon_theme=OneUI-light/' "$qt_conf"
-          echo "Updated Qt icon theme in $(basename $(dirname $qt_conf))"
-        fi
-      done
-
-      # Fix fontconfig conf.d if it's a file instead of directory
-      if [ -f "$targetPath/fontconfig/conf.d" ]; then
-        $DRY_RUN_CMD rm "$targetPath/fontconfig/conf.d"
-        $DRY_RUN_CMD mkdir -p "$targetPath/fontconfig/conf.d"
-        echo "Fixed fontconfig/conf.d to be a directory"
-      fi
-
-      # Copy .local/share contents (icons, etc.)
-      localSharePath="${dotfilesSource}/dots/.local/share"
-      targetLocalShare="$HOME/.local/share"
-
-      if [ -d "$localSharePath" ]; then
-        $DRY_RUN_CMD mkdir -p "$targetLocalShare"
-
-        for item in "$localSharePath"/*; do
-          if [ -e "$item" ]; then
-            itemName=$(basename "$item")
-            targetItem="$targetLocalShare/$itemName"
-
-            # Remove existing file/directory if it exists
-            if [ -e "$targetItem" ] || [ -L "$targetItem" ]; then
-              $DRY_RUN_CMD rm -rf "$targetItem"
-            fi
-
-            # Copy the item
-            $DRY_RUN_CMD cp -r "$item" "$targetItem"
-
-            # Make files writable
-            $DRY_RUN_CMD chmod -R u+w "$targetItem"
-          fi
-        done
-
-        # Move illogical-impulse icon to the correct hicolor theme directory if it exists
-        if [ -f "$targetLocalShare/icons/illogical-impulse.svg" ]; then
-          $DRY_RUN_CMD mkdir -p "$targetLocalShare/icons/hicolor/scalable/apps"
-          $DRY_RUN_CMD mv "$targetLocalShare/icons/illogical-impulse.svg" "$targetLocalShare/icons/hicolor/scalable/apps/"
-          echo "Moved illogical-impulse icon to hicolor theme directory"
-        fi
-
-        echo "Copied Illogical Impulse .local/share files to ~/.local/share"
-      fi
-
-      # Copy OneUI icon themes and modify index.theme to inherit from Papirus and Adwaita
-      for theme in OneUI-dark OneUI-light; do
-        # Use Papirus for primary fallback (has inode-directory), then Adwaita, then hicolor
-        papirus_theme="Papirus-Dark"
-        if [ "$theme" = "OneUI-light" ]; then
-          papirus_theme="Papirus-Light"
-        fi
-        fallback_theme="$papirus_theme,Adwaita"
-
-        # Remove existing OneUI theme directory
-        if [ -e "$targetLocalShare/icons/$theme" ] || [ -L "$targetLocalShare/icons/$theme" ]; then
-          $DRY_RUN_CMD rm -rf "$targetLocalShare/icons/$theme"
-        fi
-
-        # Copy OneUI theme from nix store
-        oneui_source="${oneUIIconsPath}/$theme"
-        if [ -d "$oneui_source" ]; then
-          $DRY_RUN_CMD cp -r "$oneui_source" "$targetLocalShare/icons/$theme"
-          $DRY_RUN_CMD chmod -R u+w "$targetLocalShare/icons/$theme"
-
-          # Update the Inherits line to include Papirus and Adwaita fallbacks
-          if [ -f "$targetLocalShare/icons/$theme/index.theme" ]; then
-            $DRY_RUN_CMD sed -i "s/^Inherits=.*/Inherits=$fallback_theme,hicolor/" "$targetLocalShare/icons/$theme/index.theme"
-            echo "Copied and updated $theme to inherit from $fallback_theme"
-          fi
-        fi
-      done
-
-      # Fix Papirus themes to replace breeze inheritance with Adwaita
-      # Since breeze doesn't have inode-directory icons, we bypass it entirely
-      echo "Fixing Papirus icon inheritance..."
-      for papirus_theme in Papirus-Dark Papirus-Light Papirus; do
-        papirus_local="$targetLocalShare/icons/$papirus_theme"
-        papirus_source="${pkgs.papirus-icon-theme}/share/icons/$papirus_theme"
-
-        # Always copy from source (removing symlink or directory if exists)
-        if [ -e "$papirus_local" ] || [ -L "$papirus_local" ]; then
-          $DRY_RUN_CMD rm -rf "$papirus_local"
-        fi
-
-        if [ -d "$papirus_source" ]; then
-          $DRY_RUN_CMD cp -r "$papirus_source" "$papirus_local"
-          $DRY_RUN_CMD chmod -R u+w "$papirus_local"
-
-          # Replace breeze inheritance with Adwaita
-          if [ -f "$papirus_local/index.theme" ]; then
-            $DRY_RUN_CMD sed -i 's/Inherits=breeze-dark,/Inherits=Adwaita,/g' "$papirus_local/index.theme"
-            $DRY_RUN_CMD sed -i 's/Inherits=breeze-light,/Inherits=Adwaita,/g' "$papirus_local/index.theme"
-            $DRY_RUN_CMD sed -i 's/Inherits=breeze,/Inherits=Adwaita,/g' "$papirus_local/index.theme"
-            echo "Updated $papirus_theme to inherit from Adwaita"
-          fi
-
-          # Papirus already has inode-directory as symlinks, but let's ensure they exist
-          for size_dir in "$papirus_local"/*/places; do
-            if [ -d "$size_dir" ] && [ -f "$size_dir/folder.svg" ]; then
-              if [ ! -e "$size_dir/inode-directory.svg" ]; then
-                $DRY_RUN_CMD ln -sf folder.svg "$size_dir/inode-directory.svg"
-                echo "Created inode-directory symlink in $(dirname "$size_dir")/places"
-              fi
-            fi
-          done
-          echo "Processed $papirus_theme successfully"
-        fi
-      done
-
-      # Generate NixOS-specific hyprland custom/env.lua
-      # This runs AFTER the copy loop, overwriting the empty upstream custom/env.lua.
-      # It is sourced by hyprland.lua after hyprland/env.lua, so it can override defaults.
-      hyprCustomEnv="$targetPath/hypr/custom/env.lua"
-      if [ -d "$targetPath/hypr/custom" ]; then
-        cat > "$hyprCustomEnv" << 'LUAEOF'
--- Generated by illogical-flake. Do not edit manually (regenerated on home-manager switch).
--- Sourced by hyprland.lua after hyprland/env.lua -- overrides apply to the whole session.
-local home_dir = os.getenv("HOME") or ""
-local user     = os.getenv("USER") or ""
-
--- Prepend Nix profile bins so Nix-installed tools are found
-hl.env("PATH",
-  home_dir .. "/.nix-profile/bin" ..
-  ":/etc/profiles/per-user/" .. user .. "/bin" ..
-  ":" .. (os.getenv("PATH") or "/usr/local/bin:/usr/bin:/bin"))
-
--- Extend XDG_DATA_DIRS with Nix profile share dirs so desktop files / icons are found
-hl.env("XDG_DATA_DIRS",
-  home_dir .. "/.local/share" ..
-  ":" .. home_dir .. "/.nix-profile/share" ..
-  ":/etc/profiles/per-user/" .. user .. "/share" ..
-  ":/run/current-system/sw/share" ..
-  ":" .. home_dir .. "/.local/share/flatpak/exports/share" ..
-  ":/var/lib/flatpak/exports/share" ..
-  ":/usr/local/share:/usr/share")
-
--- Use qt6ct (available in Nix profile) instead of upstream "kde"
-hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
-LUAEOF
-        chmod u+w "$hyprCustomEnv"
-        echo "Generated hyprland custom/env.lua with NixOS paths"
-      fi
-
-      # Generate custom/general.lua with declarative plugin loading
-      hyprCustomGeneral="$targetPath/hypr/custom/general.lua"
-      if [ -d "$targetPath/hypr/custom" ]; then
-        # Append plugin calls to whatever the upstream default general.lua has
-        cat >> "$hyprCustomGeneral" << 'LUAEOF'
-
--- Hyprland plugins loaded by illogical-flake
-${lib.concatMapStrings (plugin: ''
-hl.plugin("${plugin}/lib/lib${plugin.pname}.so")
-'') cfg.hyprland.plugins}LUAEOF
-        chmod u+w "$hyprCustomGeneral"
-        echo "Generated hyprland custom/general.lua plugin entries"
-      fi
-
-      # Update icon cache for all installed icon themes
-      echo "Updating icon cache..."
-      for theme_dir in "$targetLocalShare/icons"/*; do
-        if [ -d "$theme_dir" ]; then
-          theme_name=$(basename "$theme_dir")
-          if [ -f "$theme_dir/index.theme" ] || [ -f "$theme_dir/icon-theme.cache" ]; then
-            $DRY_RUN_CMD ${pkgs.gtk3}/bin/gtk-update-icon-cache -f -t "$theme_dir" 2>/dev/null || true
-            echo "Updated icon cache for $theme_name"
-          fi
-        fi
-      done
-    '';
   };
 }

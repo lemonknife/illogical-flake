@@ -32,6 +32,30 @@ let
     ps."pyproject-hooks"
     ps.opencv4
   ]);
+
+  patchedPapirus = pkgs.papirus-icon-theme.overrideAttrs (oldAttrs: {
+    postInstall = (oldAttrs.postInstall or "") + ''
+      echo "Applying Illogical Impulse patches to Papirus..."
+
+      # 1. 移除对 breeze 的继承，替换为 Adwaita (避免找不到基础图标)
+      for theme in $out/share/icons/Papirus*; do
+        if [ -f "$theme/index.theme" ]; then
+          sed -i 's/Inherits=breeze-dark,/Inherits=Adwaita,/g' "$theme/index.theme"
+          sed -i 's/Inherits=breeze-light,/Inherits=Adwaita,/g' "$theme/index.theme"
+          sed -i 's/Inherits=breeze,/Inherits=Adwaita,/g' "$theme/index.theme"
+        fi
+      done
+
+      # 2. 修复 Wayland/部分文件管理器下缺失的文件夹图标
+      for size_dir in $out/share/icons/Papirus*/*/places; do
+        if [ -d "$size_dir" ] && [ -f "$size_dir/folder.svg" ]; then
+          if [ ! -e "$size_dir/inode-directory.svg" ]; then
+            ln -sf folder.svg "$size_dir/inode-directory.svg"
+          fi
+        fi
+      done
+    '';
+  });
 in
 {
   # Export pythonEnv for use in other modules
@@ -61,6 +85,9 @@ in
       libqalculate
       ripgrep
       jq
+      yq-go
+      inetutils
+      songrec
 
       # GUI applications
       foot
@@ -90,6 +117,7 @@ in
       libnotify  # Provides notify-send
       easyeffects
       grim
+      xorg.xlsclients
 
       # Wayland/Hyprland specific
       hyprlock
@@ -108,11 +136,13 @@ in
       # Themes and icons
       adw-gtk3
       customPkgs.illogical-impulse-oneui4-icons
-      papirus-icon-theme  # Primary icon theme
+      patchedPapirus            # Primary icon theme
       adwaita-icon-theme  # GNOME fallback icons
       hicolor-icon-theme  # Base icon theme (required by most themes)
       gnome-icon-theme  # Additional GNOME icon coverage
       kdePackages.breeze-icons  # KDE Breeze icons (required by Papirus inheritance)
+      inputs.darkly.packages.${pkgs.stdenv.hostPlatform.system}.darkly-qt5
+      inputs.darkly.packages.${pkgs.stdenv.hostPlatform.system}.darkly-qt6
 
       # Python with required packages for wallpaper analysis
       pythonEnv
@@ -125,6 +155,7 @@ in
       kdePackages.polkit-kde-agent-1  # Polkit authentication agent
       kdePackages.kdialog  # Dialog prompts
       kdePackages.kirigami
+      kdePackages.kconfig
 
       # Additional Qt support
       libsForQt5.qtgraphicaleffects

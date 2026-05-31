@@ -12,6 +12,7 @@ in
     home.packages = with pkgs; [
       customPkgs.material-symbols
       rubik
+      twemoji-color-font
       nurPkgs.repos.skiletro.gabarito
       nerd-fonts.ubuntu
       nerd-fonts.ubuntu-mono

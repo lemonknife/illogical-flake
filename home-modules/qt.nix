@@ -75,6 +75,7 @@ EOF
                   pkgs.kdePackages.qtwayland
                   pkgs.kdePackages.qtimageformats
                   pkgs.qt6Packages.qt6ct
+                  pkgs.kdePackages.kimageformats
                 ]}" \
                 --set QT_QPA_PLATFORMTHEME "qt6ct" \
                 --prefix PATH : "${pythonEnv}/bin" \
@@ -91,6 +92,7 @@ EOF
       kdePackages.qtdeclarative
       kdePackages.qtimageformats # WEBP and other image formats
       kdePackages.qtmultimedia   # Media playback
+      kdePackages.kimageformats
       kdePackages.qtpositioning
       kdePackages.qtquicktimeline
       kdePackages.qtsensors

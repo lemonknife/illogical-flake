@@ -15,6 +15,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    darkly.url = "github:Bali10050/Darkly";
+
     # Default dotfiles - can be overridden by users
     dotfiles = {
       url = "git+https://github.com/end-4/dots-hyprland?submodules=1";
@@ -22,9 +24,9 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, quickshell, nur, dotfiles, ... }:
+  outputs = inputs@{ self, nixpkgs, quickshell, nur, dotfiles, darkly, ... }:
     let
-      flakeInputs = { inherit quickshell nur dotfiles; };
+      flakeInputs = { inherit quickshell nur dotfiles darkly; };
     in {
       # Home-manager module for user configuration
       homeManagerModules.default = { config, lib, pkgs, ... }: (import ./home-module.nix) {
