@@ -69,11 +69,16 @@ in
     # 核心重构：细粒度纯声明式配置映射
     # ==========================================
     xdg.configFile = {
-      # 终端与 Shell
-      "fish" = mkIf cfg.dotfiles.fish.enable { source = "${dotfilesSource}/dots/.config/fish"; };
+      "fish" = mkIf cfg.dotfiles.fish.enable { 
+        source = "${dotfilesSource}/dots/.config/fish"; 
+        recursive = true;
+      };
       "kitty" = mkIf cfg.dotfiles.kitty.enable { source = "${dotfilesSource}/dots/.config/kitty"; };
       "starship.toml" = mkIf cfg.dotfiles.starship.enable { source = "${dotfilesSource}/dots/.config/starship.toml"; };
-      "zshrc.d" = mkIf cfg.dotfiles.zshrc.enable { source = "${dotfilesSource}/dots/.config/zshrc.d"; };
+      "zshrc.d" = mkIf cfg.dotfiles.zshrc.enable { 
+        source = "${dotfilesSource}/dots/.config/zshrc.d"; 
+        recursive = true;
+      };
       "foot" = mkIf cfg.dotfiles.foot.enable { source = "${dotfilesSource}/dots/.config/foot"; };
       "konsolerc" = mkIf cfg.dotfiles.konsolerc.enable { source = "${dotfilesSource}/dots/.config/konsolerc"; };
 
