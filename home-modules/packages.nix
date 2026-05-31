@@ -136,6 +136,7 @@ in
       # Themes and icons
       adw-gtk3
       customPkgs.illogical-impulse-oneui4-icons
+      customPkgs.breeze-plus
       patchedPapirus            # Primary icon theme
       adwaita-icon-theme  # GNOME fallback icons
       hicolor-icon-theme  # Base icon theme (required by most themes)
