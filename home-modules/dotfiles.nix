@@ -59,8 +59,8 @@ in
 
   config = mkIf cfg.enable {
     # Shell programs
-    programs.fish.enable = cfg.dotfiles.fish.enable;
-    programs.starship.enable = cfg.dotfiles.starship.enable;
+    programs.fish.enable = mkIf cfg.dotfiles.fish.enable true;
+    programs.starship.enable = mkIf cfg.dotfiles.starship.enable true;
 
     # Install plugin .so files into the user environment
     home.packages = cfg.hyprland.plugins;
