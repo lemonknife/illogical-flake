@@ -182,7 +182,6 @@ in
     };
 
     home.activation.seedDynamicConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
-      # 1. 初始化一个空的 Bash 数组
       dynamic_files=()
 
       ${lib.optionalString cfg.dotfiles.fish.enable ''
