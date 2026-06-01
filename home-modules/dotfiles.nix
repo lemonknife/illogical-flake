@@ -1,9 +1,20 @@
 inputs:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  inherit (lib) mkEnableOption mkOption types mkIf mkDefault;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    types
+    mkIf
+    mkDefault
+    ;
   cfg = config.programs.illogical-impulse;
 
   # Use dotfiles from flake input
@@ -16,48 +27,96 @@ in
 {
   options.programs.illogical-impulse.dotfiles = {
     # 终端与 Shell
-    fish.enable = mkEnableOption "fish config" // { default = true; };
-    kitty.enable = mkEnableOption "kitty config" // { default = false; };
-    starship.enable = mkEnableOption "starship config" // { default = true; };
-    zshrc.enable = mkEnableOption "zshrc config" // { default = true; };
-    foot.enable = mkEnableOption "foot config" // { default = false; };
-    konsolerc.enable = mkEnableOption "konsolerc config" // { default = false; };
+    fish.enable = mkEnableOption "fish config" // {
+      default = true;
+    };
+    kitty.enable = mkEnableOption "kitty config" // {
+      default = false;
+    };
+    starship.enable = mkEnableOption "starship config" // {
+      default = true;
+    };
+    zshrc.enable = mkEnableOption "zshrc config" // {
+      default = true;
+    };
+    foot.enable = mkEnableOption "foot config" // {
+      default = false;
+    };
+    konsolerc.enable = mkEnableOption "konsolerc config" // {
+      default = false;
+    };
 
     # 桌面与核心组件 (Hyprland 生态拆分)
-    hyprland.enable = mkEnableOption "hyprland base config" // { default = true; };
+    hyprland.enable = mkEnableOption "hyprland base config" // {
+      default = true;
+    };
     hyprland.pluginFileName = mkOption {
       type = types.str;
       default = "general.lua";
       description = "The filename inside hypr/custom to inject plugin loads. If not general.lua, the original general.lua will be mutable";
     };
-    hyprlock.enable = mkEnableOption "hyprlock config" // { default = true; };
-    hypridle.enable = mkEnableOption "hypridle config" // { default = true; };
-    
-    quickshell.enable = mkEnableOption "quickshell config" // { default = true; };
-    wlogout.enable = mkEnableOption "wlogout config" // { default = true; };
-    fuzzel.enable = mkEnableOption "fuzzel config" // { default = true; };
-    xdg-desktop-portal.enable = mkEnableOption "xdg-desktop-portal config" // { default = true; };
+    hyprlock.enable = mkEnableOption "hyprlock config" // {
+      default = true;
+    };
+    hypridle.enable = mkEnableOption "hypridle config" // {
+      default = true;
+    };
+
+    quickshell.enable = mkEnableOption "quickshell config" // {
+      default = true;
+    };
+    wlogout.enable = mkEnableOption "wlogout config" // {
+      default = true;
+    };
+    fuzzel.enable = mkEnableOption "fuzzel config" // {
+      default = true;
+    };
+    xdg-desktop-portal.enable = mkEnableOption "xdg-desktop-portal config" // {
+      default = true;
+    };
 
     # 主题、外观与字体
-    fontconfig.enable = mkEnableOption "fontconfig" // { default = false; };
-    kde-material-you-colors.enable = mkEnableOption "kde-material-you-colors" // { default = true; };
-    kdeglobals.enable = mkEnableOption "kdeglobals" // { default = true; };
-    Kvantum.enable = mkEnableOption "Kvantum" // { default = true; };
-    matugen.enable = mkEnableOption "matugen config" // { default = true; };
-    darklyrc.enable = mkEnableOption "darklyrc" // { default = true; };
-    dolphinrc.enable = mkEnableOption "dolphinrc" // { default = true; };
+    fontconfig.enable = mkEnableOption "fontconfig" // {
+      default = false;
+    };
+    kde-material-you-colors.enable = mkEnableOption "kde-material-you-colors" // {
+      default = true;
+    };
+    kdeglobals.enable = mkEnableOption "kdeglobals" // {
+      default = true;
+    };
+    Kvantum.enable = mkEnableOption "Kvantum" // {
+      default = true;
+    };
+    matugen.enable = mkEnableOption "matugen config" // {
+      default = true;
+    };
+    darklyrc.enable = mkEnableOption "darklyrc" // {
+      default = true;
+    };
+    dolphinrc.enable = mkEnableOption "dolphinrc" // {
+      default = true;
+    };
 
     # 浏览器与其他应用
-    chrome-flags.enable = mkEnableOption "chrome-flags" // { default = true; };
-    thorium-flags.enable = mkEnableOption "thorium-flags" // { default = true; };
-    code-flags.enable = mkEnableOption "code-flags" // { default = true; };
-    mpv.enable = mkEnableOption "mpv config" // { default = false; };
+    chrome-flags.enable = mkEnableOption "chrome-flags" // {
+      default = true;
+    };
+    thorium-flags.enable = mkEnableOption "thorium-flags" // {
+      default = true;
+    };
+    code-flags.enable = mkEnableOption "code-flags" // {
+      default = true;
+    };
+    mpv.enable = mkEnableOption "mpv config" // {
+      default = false;
+    };
   };
 
   options.programs.illogical-impulse.hyprland = {
     plugins = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "Hyprland plugins to install and load via hl.plugin()";
     };
   };
@@ -71,15 +130,21 @@ in
     home.packages = cfg.hyprland.plugins;
 
     xdg.configFile = {
-      "hypr/hypridle.conf" = mkIf cfg.dotfiles.hypridle.enable { source = "${dotfilesSource}/dots/.config/hypr/hypridle.conf"; };
-      
-      "hypr/hyprlock.conf" = mkIf cfg.dotfiles.hyprlock.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprlock.conf"; };
-      "hypr/hyprlock" = mkIf cfg.dotfiles.hyprlock.enable { 
-        source = "${dotfilesSource}/dots/.config/hypr/hyprlock"; 
+      "hypr/hypridle.conf" = mkIf cfg.dotfiles.hypridle.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hypridle.conf";
+      };
+
+      "hypr/hyprlock.conf" = mkIf cfg.dotfiles.hyprlock.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprlock.conf";
+      };
+      "hypr/hyprlock" = mkIf cfg.dotfiles.hyprlock.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprlock";
         recursive = true;
       };
 
-      "hypr/hyprland.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland.lua"; };
+      "hypr/hyprland.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland.lua";
+      };
 
       "hypr/custom/env.lua" = mkIf cfg.dotfiles.hyprland.enable {
         text = ''
@@ -107,45 +172,81 @@ in
 
       "hypr/custom/${cfg.dotfiles.hyprland.pluginFileName}" = mkIf cfg.dotfiles.hyprland.enable {
         text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/custom/general.lua") + ''
-          
+
           -- Hyprland plugins loaded declaratively by Nix
           ${lib.concatMapStrings (plugin: ''
-          hl.plugin("${plugin}/lib/lib${plugin.pname}.so")
+            hl.plugin("${plugin}/lib/lib${plugin.pname}.so")
           '') cfg.hyprland.plugins}
         '';
       };
 
-      "hypr/hyprland/env.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/env.lua"; };
-      "hypr/hyprland/execs.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/execs.lua"; };
-      "hypr/hyprland/general.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/general.lua"; };
-      "hypr/hyprland/keybinds.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/keybinds.lua"; };
-      "hypr/hyprland/lib" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/lib"; };
-      "hypr/hyprland/rules.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/rules.lua"; };
-      "hypr/hyprland/scripts" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/scripts"; };
-      "hypr/hyprland/services" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/services"; };
-      "hypr/hyprland/variables.lua" = mkIf cfg.dotfiles.hyprland.enable { source = "${dotfilesSource}/dots/.config/hypr/hyprland/variables.lua"; };
+      "hypr/hyprland/env.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/env.lua";
+      };
+      "hypr/hyprland/execs.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/execs.lua";
+      };
+      "hypr/hyprland/general.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/general.lua";
+      };
+      "hypr/hyprland/keybinds.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/keybinds.lua";
+      };
+      "hypr/hyprland/lib" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/lib";
+      };
+      "hypr/hyprland/rules.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/rules.lua";
+      };
+      "hypr/hyprland/scripts" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/scripts";
+      };
+      "hypr/hyprland/services" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/services";
+      };
+      "hypr/hyprland/variables.lua" = mkIf cfg.dotfiles.hyprland.enable {
+        source = "${dotfilesSource}/dots/.config/hypr/hyprland/variables.lua";
+      };
 
-      "quickshell/ii" = mkIf cfg.dotfiles.quickshell.enable { source = "${dotfilesSource}/dots/.config/quickshell/ii"; };
+      "quickshell/ii" = mkIf cfg.dotfiles.quickshell.enable {
+        source = "${dotfilesSource}/dots/.config/quickshell/ii";
+      };
       "wlogout" = mkIf cfg.dotfiles.wlogout.enable { source = "${dotfilesSource}/dots/.config/wlogout"; };
-      "fuzzel/fuzzel.ini" = mkIf cfg.dotfiles.fuzzel.enable { source = "${dotfilesSource}/dots/.config/fuzzel/fuzzel.ini"; };
-      "xdg-desktop-portal" = mkIf cfg.dotfiles.xdg-desktop-portal.enable { source = "${dotfilesSource}/dots/.config/xdg-desktop-portal"; };
+      "fuzzel/fuzzel.ini" = mkIf cfg.dotfiles.fuzzel.enable {
+        source = "${dotfilesSource}/dots/.config/fuzzel/fuzzel.ini";
+      };
+      "xdg-desktop-portal" = mkIf cfg.dotfiles.xdg-desktop-portal.enable {
+        source = "${dotfilesSource}/dots/.config/xdg-desktop-portal";
+      };
       "fontconfig" = mkIf cfg.dotfiles.fontconfig.enable {
         source = "${dotfilesSource}/dots/.config/fontconfig";
         recursive = true;
       };
-      "kdeglobals" = mkIf cfg.dotfiles.kdeglobals.enable { source = "${dotfilesSource}/dots/.config/kdeglobals"; };
+      "kdeglobals" = mkIf cfg.dotfiles.kdeglobals.enable {
+        source = "${dotfilesSource}/dots/.config/kdeglobals";
+      };
       "Kvantum" = mkIf cfg.dotfiles.Kvantum.enable { source = "${dotfilesSource}/dots/.config/Kvantum"; };
       "matugen" = mkIf cfg.dotfiles.matugen.enable { source = "${dotfilesSource}/dots/.config/matugen"; };
-      "darklyrc" = mkIf cfg.dotfiles.darklyrc.enable { source = "${dotfilesSource}/dots/.config/darklyrc"; };
-      "dolphinrc" = mkIf cfg.dotfiles.dolphinrc.enable { source = "${dotfilesSource}/dots/.config/dolphinrc"; };
-      "chrome-flags.conf" = mkIf cfg.dotfiles.chrome-flags.enable { source = "${dotfilesSource}/dots/.config/chrome-flags.conf"; };
-      "thorium-flags.conf" = mkIf cfg.dotfiles.thorium-flags.enable { source = "${dotfilesSource}/dots/.config/thorium-flags.conf"; };
-      "code-flags.conf" = mkIf cfg.dotfiles.code-flags.enable { source = "${dotfilesSource}/dots/.config/code-flags.conf"; };
+      "darklyrc" = mkIf cfg.dotfiles.darklyrc.enable {
+        source = "${dotfilesSource}/dots/.config/darklyrc";
+      };
+      "dolphinrc" = mkIf cfg.dotfiles.dolphinrc.enable {
+        source = "${dotfilesSource}/dots/.config/dolphinrc";
+      };
+      "chrome-flags.conf" = mkIf cfg.dotfiles.chrome-flags.enable {
+        source = "${dotfilesSource}/dots/.config/chrome-flags.conf";
+      };
+      "thorium-flags.conf" = mkIf cfg.dotfiles.thorium-flags.enable {
+        source = "${dotfilesSource}/dots/.config/thorium-flags.conf";
+      };
+      "code-flags.conf" = mkIf cfg.dotfiles.code-flags.enable {
+        source = "${dotfilesSource}/dots/.config/code-flags.conf";
+      };
       "mpv" = mkIf cfg.dotfiles.mpv.enable { source = "${dotfilesSource}/dots/.config/mpv"; };
     };
 
     xdg.dataFile = {
-      "icons/hicolor/scalable/apps/illogical-impulse.svg".source = 
+      "icons/hicolor/scalable/apps/illogical-impulse.svg".source =
         "${dotfilesSource}/dots/.local/share/icons/illogical-impulse.svg";
     };
 
@@ -157,10 +258,8 @@ in
         export PATH="${cfg.internal.pythonEnv}/bin:$PATH"
         deactivate() { return 0; }
       '';
-      ".local/state/quickshell/.venv/bin/python".source =
-        "${cfg.internal.pythonEnv}/bin/python";
-      ".local/state/quickshell/.venv/bin/python3".source =
-        "${cfg.internal.pythonEnv}/bin/python3";
+      ".local/state/quickshell/.venv/bin/python".source = "${cfg.internal.pythonEnv}/bin/python";
+      ".local/state/quickshell/.venv/bin/python3".source = "${cfg.internal.pythonEnv}/bin/python3";
       ".local/state/quickshell/.venv/pyvenv.cfg".text = ''
         home = ${cfg.internal.pythonEnv}/bin
         include-system-site-packages = false
@@ -183,36 +282,39 @@ in
       };
     };
 
-    home.activation.seedDynamicConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
+    home.activation.seedDynamicConfigs = config.lib.dag.entryAfter [ "writeBoundary" ] ''
       dynamic_files=()
 
       ${lib.optionalString cfg.dotfiles.fish.enable ''
-      dynamic_files+=("fish")
+        dynamic_files+=("fish")
       ''}
       ${lib.optionalString cfg.dotfiles.kitty.enable ''
-      dynamic_files+=("kitty")
+        dynamic_files+=("kitty")
       ''}
       ${lib.optionalString cfg.dotfiles.starship.enable ''
-      dynamic_files+=("starship.toml")
+        dynamic_files+=("starship.toml")
       ''}
       ${lib.optionalString cfg.dotfiles.zshrc.enable ''
-      dynamic_files+=("zshrc.d")
+        dynamic_files+=("zshrc.d")
       ''}
       ${lib.optionalString cfg.dotfiles.foot.enable ''
-      dynamic_files+=("foot")
+        dynamic_files+=("foot")
       ''}
       ${lib.optionalString cfg.dotfiles.konsolerc.enable ''
-      dynamic_files+=("konsolerc")
+        dynamic_files+=("konsolerc")
       ''}
 
       ${lib.optionalString cfg.dotfiles.hyprland.enable ''
-      dynamic_files+=("hypr/hyprland/colors.lua")
-      dynamic_files+=("hypr/hyprland/shellOverrides/main.lua")
+        dynamic_files+=("hypr/hyprland/colors.lua")
+        dynamic_files+=("hypr/hyprland/shellOverrides/main.lua")
       ''}
 
-      ${lib.optionalString (cfg.dotfiles.hyprland.enable && cfg.hyprland.pluginFileName != "general.lua") ''
-      dynamic_files+=("hypr/custom/general.lua")
-      ''}
+      ${lib.optionalString
+        (cfg.dotfiles.hyprland.enable && cfg.dotfiles.hyprland.pluginFileName != "general.lua")
+        ''
+          dynamic_files+=("hypr/custom/general.lua")
+        ''
+      }
       dynamic_files+=("hypr/custom/execs.lua")
       dynamic_files+=("hypr/custom/keybinds.lua")
       dynamic_files+=("hypr/custom/rules.lua")
@@ -220,13 +322,13 @@ in
       dynamic_files+=("hypr/custom/variables.lua")
 
       ${lib.optionalString cfg.dotfiles.hyprlock.enable ''
-      dynamic_files+=("hypr/hyprlock/colors.conf")
+        dynamic_files+=("hypr/hyprlock/colors.conf")
       ''}
       ${lib.optionalString cfg.dotfiles.fuzzel.enable ''
-      dynamic_files+=("fuzzel/fuzzel_theme.ini")
+        dynamic_files+=("fuzzel/fuzzel_theme.ini")
       ''}
       ${lib.optionalString cfg.dotfiles.kde-material-you-colors.enable ''
-      dynamic_files+=("kde-material-you-colors")
+        dynamic_files+=("kde-material-you-colors")
       ''}
 
       if [ ''${#dynamic_files[@]} -gt 0 ]; then
@@ -253,15 +355,15 @@ in
       fi
 
       ${lib.optionalString cfg.dotfiles.konsolerc.enable ''
-      KONSOLE_TARGET="$HOME/.local/share/konsole"
-      KONSOLE_SOURCE="${dotfilesSource}/dots/.local/share/konsole"
+        KONSOLE_TARGET="$HOME/.local/share/konsole"
+        KONSOLE_SOURCE="${dotfilesSource}/dots/.local/share/konsole"
 
-      if [ -d "$KONSOLE_SOURCE" ]; then
-        $DRY_RUN_CMD mkdir -p "$KONSOLE_TARGET"
-        $DRY_RUN_CMD cp -nr "$KONSOLE_SOURCE/." "$KONSOLE_TARGET/" 2>/dev/null || true
-        $DRY_RUN_CMD chmod -R u+w "$KONSOLE_TARGET" 2>/dev/null || true
-        echo "Seeded Konsole profiles"
-      fi
+        if [ -d "$KONSOLE_SOURCE" ]; then
+          $DRY_RUN_CMD mkdir -p "$KONSOLE_TARGET"
+          $DRY_RUN_CMD cp -nr "$KONSOLE_SOURCE/." "$KONSOLE_TARGET/" 2>/dev/null || true
+          $DRY_RUN_CMD chmod -R u+w "$KONSOLE_TARGET" 2>/dev/null || true
+          echo "Seeded Konsole profiles"
+        fi
       ''}
     '';
   };
