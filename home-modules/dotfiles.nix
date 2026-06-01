@@ -25,6 +25,11 @@ in
 
     # 桌面与核心组件 (Hyprland 生态拆分)
     hyprland.enable = mkEnableOption "hyprland base config" // { default = true; };
+    hyprland.pluginFileName = mkOption {
+      type = types.str;
+      default = "general.lua";
+      description = "The filename inside hypr/custom to inject plugin loads. If not general.lua, the original general.lua will be mutable";
+    };
     hyprlock.enable = mkEnableOption "hyprlock config" // { default = true; };
     hypridle.enable = mkEnableOption "hypridle config" // { default = true; };
     
@@ -65,9 +70,6 @@ in
     # Install plugin .so files into the user environment
     home.packages = cfg.hyprland.plugins;
 
-    # ==========================================
-    # 核心重构：细粒度纯声明式配置映射
-    # ==========================================
     xdg.configFile = {
       "hypr/hypridle.conf" = mkIf cfg.dotfiles.hypridle.enable { source = "${dotfilesSource}/dots/.config/hypr/hypridle.conf"; };
       
@@ -103,7 +105,7 @@ in
         '';
       };
 
-      "hypr/custom/general.lua" = mkIf cfg.dotfiles.hyprland.enable {
+      "hypr/custom/${cfg.dotfiles.hyprland.pluginFileName}" = mkIf cfg.dotfiles.hyprland.enable {
         text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/custom/general.lua") + ''
           
           -- Hyprland plugins loaded declaratively by Nix
@@ -206,6 +208,10 @@ in
       ${lib.optionalString cfg.dotfiles.hyprland.enable ''
       dynamic_files+=("hypr/hyprland/colors.lua")
       dynamic_files+=("hypr/hyprland/shellOverrides/main.lua")
+      ''}
+
+      ${lib.optionalString (cfg.dotfiles.hyprland.enable && cfg.hyprland.pluginFileName != "general.lua") ''
+      dynamic_files+=("hypr/custom/general.lua")
       ''}
       dynamic_files+=("hypr/custom/execs.lua")
       dynamic_files+=("hypr/custom/keybinds.lua")
