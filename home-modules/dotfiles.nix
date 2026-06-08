@@ -130,9 +130,6 @@ in
     home.packages = cfg.hyprland.plugins;
 
     xdg.configFile = {
-      "hypr/hypridle.conf" = mkIf cfg.dotfiles.hypridle.enable {
-        source = "${dotfilesSource}/dots/.config/hypr/hypridle.conf";
-      };
 
       "hypr/hyprlock.conf" = mkIf cfg.dotfiles.hyprlock.enable {
         source = "${dotfilesSource}/dots/.config/hypr/hyprlock.conf";
@@ -323,6 +320,9 @@ in
 
       ${lib.optionalString cfg.dotfiles.hyprlock.enable ''
         dynamic_files+=("hypr/hyprlock/colors.conf")
+      ''}
+      ${lib.optionalString cfg.dotfiles.hypridle.enable ''
+        dynamic_files+=("hypr/hypridle.conf")
       ''}
       ${lib.optionalString cfg.dotfiles.fuzzel.enable ''
         dynamic_files+=("fuzzel/fuzzel_theme.ini")
