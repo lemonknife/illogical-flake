@@ -168,12 +168,13 @@ in
       };
 
       "hypr/custom/${cfg.dotfiles.hyprland.pluginFileName}" = mkIf cfg.dotfiles.hyprland.enable {
-        text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/custom/general.lua") + ''
-
+        text = ''
           -- Hyprland plugins loaded declaratively by Nix
-          ${lib.concatMapStrings (plugin: ''
-            hl.plugin("${plugin}/lib/lib${plugin.pname}.so")
-          '') cfg.hyprland.plugins}
+          hl.on("hyprland.start", function()
+            ${lib.concatMapStrings (plugin: ''
+              hl.exec_cmd("hyprctl plugin load ${plugin}/lib/lib${plugin.pname}.so")
+            '') cfg.hyprland.plugins}
+          end)
         '';
       };
 
