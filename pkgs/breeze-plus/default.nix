@@ -1,4 +1,8 @@
-{ lib, stdenvNoCC, fetchFromGitHub }:
+{
+  lib,
+  stdenvNoCC,
+  fetchFromGitHub,
+}:
 
 stdenvNoCC.mkDerivation {
   pname = "breeze-plus";
@@ -8,7 +12,7 @@ stdenvNoCC.mkDerivation {
     owner = "mjkim0727";
     repo = "breeze-plus";
     rev = "HEAD";
-    hash = "sha256-l+Nz8MvFqPZy6jy7k4fexC3rEspF6nSj6+0ntGov9tQ=";
+    hash = "sha256-HyXf0Bn6Z9tOy1jncFHqZctNdqW6GQIH8hYdhDsKPCQ=";
   };
 
   installPhase = ''
@@ -18,8 +22,8 @@ stdenvNoCC.mkDerivation {
 
   meta = {
     description = "Breeze theme with additional icons ";
-    homepage    = "https://github.com/mjkim0727/breeze-plus";
-    license     = lib.licenses.lgpl21;
-    platforms   = lib.platforms.all;
+    homepage = "https://github.com/mjkim0727/breeze-plus";
+    license = lib.licenses.lgpl21;
+    platforms = lib.platforms.all;
   };
 }
